@@ -894,215 +894,531 @@ p { margin: 0 0 12px; }
 
 </script>
 <script>
-/* Background illustrations for Scale Up!: one flat, outlined scene per part of the year. */
+/* Background illustrations for Scale Up!: one flat, outlined editorial scene per part of the year. */
 (function (root) {
   'use strict';
-  const K = '#161a24', W = '#fbfbf8', Y = '#ffd43b', B = '#1b46c2', LB = '#a9c1f5', R = '#d8452f', G = '#2f9a68', WOOD = '#c98b5a', GRAY = '#c9cfd9';
-  const SKIN = ['#f2c7a5', '#c68863', '#8a5a3c', '#e8b48f'];
-  const HAIR = ['#3a2a20', '#d9a441', '#161a24', '#9a4a2a'];
-  const ol = `stroke="${K}" stroke-width="4" stroke-linejoin="round" stroke-linecap="round"`;
+  const K = '#161a24', W = '#fbfbf8', PAPER = '#e9ebe6', Y = '#ffd43b', B = '#1b46c2', LB = '#a9c1f5', R = '#d8452f',
+    G = '#2f9a68', LG = '#b8e6c9', P = '#8a6bd1', PINK = '#ffb3a7', WOOD = '#c98b5a', WOOD2 = '#a8714a', GRAY = '#c9cfd9',
+    DK = '#2c3242', MID = '#7a8399', SHADE = 'rgba(22,26,36,0.12)';
+  const SKIN = { a: '#f2c7a5', b: '#c68863', c: '#8a5a3c', d: '#e8b48f', e: '#f6d2b8' };
+  const HAIR = { brown: '#4a3426', blond: '#d9a441', black: '#161a24', red: '#9a4a2a', gray: '#9aa0ab', white: '#e3e5ea' };
 
-  const rect = (x, y, w, h, fill, rx = 0, extra = '') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" ${ol} ${extra}/>`;
-  const plain = (x, y, w, h, fill, rx = 0) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}"/>`;
-  const line = (x1, y1, x2, y2, w = 4, c = K) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
-  const circle = (x, y, r, fill) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" ${ol}/>`;
-  const txt = (x, y, t, size, fill, anchor = 'start', rot = 0) => `<text x="${x}" y="${y}" font-family="'Big Shoulders Display', 'Arial Narrow', sans-serif" font-weight="800" font-size="${size}" fill="${fill}" text-anchor="${anchor}" letter-spacing="1"${rot ? ` transform="rotate(${rot} ${x} ${y})"` : ''}>${t}</text>`;
+  const st = (w = 3.5) => `stroke="${K}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round"`;
+  const n = (v) => Math.round(v * 10) / 10;
+  const path = (d, fill, w = 3.5) => `<path d="${d}" fill="${fill}" ${st(w)}/>`;
+  const flat = (d, fill) => `<path d="${d}" fill="${fill}"/>`;
+  const rect = (x, y, w, h, fill, rx = 0, sw = 3.5) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(rx)}" fill="${fill}" ${st(sw)}/>`;
+  const plain = (x, y, w, h, fill, rx = 0) => `<rect x="${n(x)}" y="${n(y)}" width="${n(w)}" height="${n(h)}" rx="${n(rx)}" fill="${fill}"/>`;
+  const circ = (x, y, r, fill, sw = 3.5) => `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="${fill}" ${st(sw)}/>`;
+  const dot = (x, y, r, fill) => `<circle cx="${n(x)}" cy="${n(y)}" r="${n(r)}" fill="${fill}"/>`;
+  const ell = (x, y, rx, ry, fill, sw = 3.5) => `<ellipse cx="${n(x)}" cy="${n(y)}" rx="${n(rx)}" ry="${n(ry)}" fill="${fill}" ${st(sw)}/>`;
+  const line = (x1, y1, x2, y2, w = 3.5, c = K) => `<line x1="${n(x1)}" y1="${n(y1)}" x2="${n(x2)}" y2="${n(y2)}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+  const stroke = (d, w = 3.5, c = K, extra = '') => `<path d="${d}" fill="none" stroke="${c}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+  const poly = (pts, fill, w = 3.5) => `<polygon points="${pts}" fill="${fill}" ${st(w)}/>`;
+  const txt = (x, y, t, size, fill, anchor = 'start', rot = 0, weight = 800) => `<text x="${n(x)}" y="${n(y)}" font-family="'Big Shoulders Display', 'Arial Narrow', sans-serif" font-weight="${weight}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" letter-spacing="1"${rot ? ` transform="rotate(${rot} ${n(x)} ${n(y)})"` : ''}>${t}</text>`;
+  // An outlined limb: a thick ink stroke with a colored stroke on top.
+  const limb = (d, color, s) => stroke(d, 22 * s + 7, K) + stroke(d, 22 * s, color);
 
-  // A person seen from behind (head and shoulders), e.g. sitting at a table.
-  function back(x, y, s, shirt, hair) {
-    return `<g>${rect(x - 44 * s, y, 88 * s, 80 * s, shirt, 34 * s)}${circle(x, y - 14 * s, 25 * s, hair)}</g>`;
-  }
-  // A person facing us, with an optional headset.
-  function front(x, y, s, shirt, skin, hair, headset) {
-    let g = rect(x - 38 * s, y + 22 * s, 76 * s, 70 * s, shirt, 30 * s);
-    g += circle(x, y, 22 * s, skin);
-    g += `<path d="M${x - 22 * s} ${y - 2 * s} Q${x} ${y - 36 * s} ${x + 22 * s} ${y - 2 * s} Q${x + 10 * s} ${y - 14 * s} ${x - 22 * s} ${y - 2 * s}Z" fill="${hair}" ${ol}/>`;
-    g += `<circle cx="${x - 8 * s}" cy="${y + 2 * s}" r="${2.5 * s}" fill="${K}"/><circle cx="${x + 8 * s}" cy="${y + 2 * s}" r="${2.5 * s}" fill="${K}"/>`;
-    g += `<path d="M${x - 7 * s} ${y + 11 * s} Q${x} ${y + 15 * s} ${x + 7 * s} ${y + 11 * s}" fill="none" ${ol}/>`;
-    if (headset) {
-      g += `<path d="M${x - 25 * s} ${y + 2 * s} Q${x} ${y - 40 * s} ${x + 25 * s} ${y + 2 * s}" fill="none" stroke="${K}" stroke-width="${5 * s}" stroke-linecap="round"/>`;
-      g += `<rect x="${x - 30 * s}" y="${y - 6 * s}" width="${10 * s}" height="${16 * s}" rx="${4 * s}" fill="${B}" ${ol}/>`;
-      g += `<path d="M${x - 25 * s} ${y + 10 * s} Q${x - 22 * s} ${y + 22 * s} ${x - 8 * s} ${y + 20 * s}" fill="none" stroke="${K}" stroke-width="${3 * s}" stroke-linecap="round"/>`;
+  // ---------- People ----------
+  function head(x, y, s, o) {
+    const skin = o.skin || SKIN.a, hair = o.hair || HAIR.brown, style = o.style || 'short';
+    const X = (v) => n(x + v * s), Yy = (v) => n(y + v * s);
+    let g = '';
+    if (style === 'long') g += path(`M${X(-30)} ${Yy(-4)} C${X(-36)} ${Yy(-46)} ${X(36)} ${Yy(-46)} ${X(30)} ${Yy(-4)} L${X(36)} ${Yy(54)} Q${X(0)} ${Yy(64)} ${X(-36)} ${Yy(54)} Z`, hair);
+    if (style === 'bob') g += path(`M${X(-30)} ${Yy(-4)} C${X(-36)} ${Yy(-46)} ${X(36)} ${Yy(-46)} ${X(30)} ${Yy(-4)} L${X(32)} ${Yy(24)} Q${X(0)} ${Yy(30)} ${X(-32)} ${Yy(24)} Z`, hair);
+    if (style === 'bun') g += circ(X(0), Yy(-36), 13 * s, hair);
+    if (style === 'pony') g += path(`M${X(16)} ${Yy(-22)} Q${X(52)} ${Yy(-12)} ${X(42)} ${Yy(34)} Q${X(32)} ${Yy(8)} ${X(14)} ${Yy(-6)} Z`, hair);
+    g += ell(X(-24), Yy(3), 5 * s, 8 * s, skin, 3) + ell(X(24), Yy(3), 5 * s, 8 * s, skin, 3);
+    if (o.earring) g += circ(X(-25), Yy(14), 3 * s, Y, 2.5) + circ(X(25), Yy(14), 3 * s, Y, 2.5);
+    g += ell(X(0), Yy(0), 24 * s, 28 * s, skin);
+    if (o.beard) g += path(`M${X(-24)} ${Yy(4)} Q${X(-22)} ${Yy(36)} ${X(0)} ${Yy(36)} Q${X(22)} ${Yy(36)} ${X(24)} ${Yy(4)} Q${X(14)} ${Yy(22)} ${X(0)} ${Yy(22)} Q${X(-14)} ${Yy(22)} ${X(-24)} ${Yy(4)} Z`, hair, 3);
+    if (style === 'short') g += path(`M${X(-25)} ${Yy(-2)} C${X(-29)} ${Yy(-40)} ${X(29)} ${Yy(-40)} ${X(25)} ${Yy(-2)} C${X(20)} ${Yy(-18)} ${X(4)} ${Yy(-22)} ${X(-6)} ${Yy(-16)} C${X(-14)} ${Yy(-20)} ${X(-21)} ${Yy(-14)} ${X(-25)} ${Yy(-2)} Z`, hair);
+    if (style === 'side') g += path(`M${X(-25)} ${Yy(0)} C${X(-29)} ${Yy(-42)} ${X(29)} ${Yy(-42)} ${X(25)} ${Yy(-6)} C${X(12)} ${Yy(-24)} ${X(-4)} ${Yy(-14)} ${X(-25)} ${Yy(0)} Z`, hair);
+    if (['long', 'bob', 'bun', 'pony'].includes(style)) g += path(`M${X(-25)} ${Yy(4)} C${X(-31)} ${Yy(-42)} ${X(31)} ${Yy(-42)} ${X(25)} ${Yy(4)} C${X(21)} ${Yy(-12)} ${X(6)} ${Yy(-20)} ${X(-2)} ${Yy(-12)} C${X(-10)} ${Yy(-20)} ${X(-22)} ${Yy(-10)} ${X(-25)} ${Yy(4)} Z`, hair);
+    if (style === 'curly') {
+      let c = '';
+      for (let i = 0; i <= 8; i++) { const a = Math.PI * (0.95 - i * 0.1125); c += circ(X(25 * Math.cos(a)), Yy(-8 - 22 * Math.sin(a)), 10 * s, hair, 3); }
+      g += c + flat(`M${X(-22)} ${Yy(-8)} Q${X(0)} ${Yy(-40)} ${X(22)} ${Yy(-8)} Z`, hair);
     }
-    return `<g>${g}</g>`;
-  }
-  function sticky(x, y, rot, c = Y) {
-    return `<g transform="rotate(${rot} ${x + 30} ${y + 30})">${rect(x, y, 60, 60, c, 2)}${line(x + 10, y + 20, x + 48, y + 20, 3)}${line(x + 10, y + 32, x + 40, y + 32, 3)}${line(x + 10, y + 44, x + 30, y + 44, 3)}</g>`;
-  }
-  function cup(x, y) { return `<g>${`<path d="M${x} ${y} L${x + 6} ${y + 34} L${x + 30} ${y + 34} L${x + 36} ${y}Z" fill="${W}" ${ol}/>`}${line(x + 4, y + 10, x + 32, y + 10, 3, R)}</g>`; }
-  function monitor(x, y, w, h, lit) {
-    let g = rect(x, y, w, h, lit ? '#e9f0ff' : '#2c3242', 6);
-    if (lit) for (let i = 0; i < 4; i++) g += line(x + 12, y + 16 + i * 12, x + w - 16 - (i % 2) * 24, y + 16 + i * 12, 3, i === 0 ? B : '#7a8399');
-    g += rect(x + w / 2 - 6, y + h, 12, 14, GRAY) + rect(x + w / 2 - 24, y + h + 14, 48, 6, GRAY, 3);
+    if (style === 'bald') g += path(`M${X(-25)} ${Yy(6)} Q${X(-27)} ${Yy(-10)} ${X(-18)} ${Yy(-16)} L${X(-18)} ${Yy(4)} Z`, hair, 3) + path(`M${X(25)} ${Yy(6)} Q${X(27)} ${Yy(-10)} ${X(18)} ${Yy(-16)} L${X(18)} ${Yy(4)} Z`, hair, 3) + stroke(`M${X(-8)} ${Yy(-20)} Q${X(0)} ${Yy(-24)} ${X(8)} ${Yy(-21)}`, 2.5, W);
+    // eyebrows
+    const bw = 3.5;
+    const brows = {
+      flat: stroke(`M${X(-15)} ${Yy(-10)} L${X(-5)} ${Yy(-10)} M${X(5)} ${Yy(-10)} L${X(15)} ${Yy(-10)}`, bw),
+      up: stroke(`M${X(-15)} ${Yy(-12)} Q${X(-10)} ${Yy(-16)} ${X(-5)} ${Yy(-13)} M${X(5)} ${Yy(-13)} Q${X(10)} ${Yy(-16)} ${X(15)} ${Yy(-12)}`, bw),
+      angry: stroke(`M${X(-15)} ${Yy(-14)} L${X(-5)} ${Yy(-9)} M${X(5)} ${Yy(-9)} L${X(15)} ${Yy(-14)}`, bw),
+      worried: stroke(`M${X(-15)} ${Yy(-9)} L${X(-5)} ${Yy(-14)} M${X(5)} ${Yy(-14)} L${X(15)} ${Yy(-9)}`, bw),
+      raised: stroke(`M${X(-15)} ${Yy(-10)} L${X(-5)} ${Yy(-10)} M${X(5)} ${Yy(-15)} Q${X(10)} ${Yy(-18)} ${X(15)} ${Yy(-14)}`, bw)
+    };
+    g += brows[o.brows || 'flat'];
+    // eyes
+    const eyes = o.eyes || 'open';
+    if (eyes === 'closed') g += stroke(`M${X(-14)} ${Yy(-1)} Q${X(-10)} ${Yy(3)} ${X(-6)} ${Yy(-1)} M${X(6)} ${Yy(-1)} Q${X(10)} ${Yy(3)} ${X(14)} ${Yy(-1)}`, 3);
+    else if (eyes === 'down') g += stroke(`M${X(-13)} ${Yy(1)} L${X(-6)} ${Yy(1)} M${X(6)} ${Yy(1)} L${X(13)} ${Yy(1)}`, 3.5);
+    else { const dx = eyes === 'side' ? 3 : eyes === 'left' ? -3 : 0; g += dot(X(-9 + dx), Yy(-1), 3.2 * s, K) + dot(X(9 + dx), Yy(-1), 3.2 * s, K); }
+    // nose
+    g += stroke(`M${X(1)} ${Yy(2)} Q${X(5)} ${Yy(9)} ${X(-1)} ${Yy(10)}`, 2.5);
+    // mouth
+    const m = o.mouth || 'smile';
+    if (m === 'smile') g += stroke(`M${X(-9)} ${Yy(15)} Q${X(0)} ${Yy(22)} ${X(9)} ${Yy(15)}`, 3);
+    if (m === 'big') g += path(`M${X(-11)} ${Yy(13)} Q${X(0)} ${Yy(28)} ${X(11)} ${Yy(13)} Z`, '#a33a2c', 3);
+    if (m === 'flat') g += line(X(-7), Yy(17), X(7), Yy(17), 3);
+    if (m === 'frown') g += stroke(`M${X(-8)} ${Yy(20)} Q${X(0)} ${Yy(13)} ${X(8)} ${Yy(20)}`, 3);
+    if (m === 'open') g += ell(X(0), Yy(18), 4 * s, 5 * s, '#a33a2c', 2.5);
+    if (m === 'smirk') g += stroke(`M${X(-7)} ${Yy(17)} Q${X(3)} ${Yy(19)} ${X(9)} ${Yy(13)}`, 3);
+    if (m === 'wavy') g += stroke(`M${X(-9)} ${Yy(17)} q${n(3 * s)} ${n(-3 * s)} ${n(6 * s)} 0 t${n(6 * s)} 0 t${n(6 * s)} 0`, 3);
+    if (o.blush) g += `<ellipse cx="${X(-15)}" cy="${Yy(9)}" rx="${n(5 * s)}" ry="${n(3 * s)}" fill="#f08a7a" opacity="0.45"/><ellipse cx="${X(15)}" cy="${Yy(9)}" rx="${n(5 * s)}" ry="${n(3 * s)}" fill="#f08a7a" opacity="0.45"/>`;
+    if (o.glasses) g += circ(X(-9), Yy(-1), 8 * s, 'rgba(255,255,255,0.25)', 2.8) + circ(X(9), Yy(-1), 8 * s, 'rgba(255,255,255,0.25)', 2.8) + line(X(-1), Yy(-2), X(1), Yy(-2), 2.8);
+    if (o.headset) {
+      g += stroke(`M${X(-27)} ${Yy(4)} C${X(-30)} ${Yy(-46)} ${X(30)} ${Yy(-46)} ${X(27)} ${Yy(4)}`, 5 * s + 3, K);
+      g += rect(X(-33), Yy(-8), 11 * s, 20 * s, B, 4 * s, 3) + rect(X(22), Yy(-8), 11 * s, 20 * s, B, 4 * s, 3);
+      g += stroke(`M${X(-29)} ${Yy(12)} Q${X(-26)} ${Yy(26)} ${X(-10)} ${Yy(22)}`, 3.5) + dot(X(-9), Yy(22), 3.5 * s, K);
+    }
     return g;
   }
-  function svg(body, bg) {
-    return `<svg viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><rect width="1200" height="480" fill="${bg}"/>${body}</svg>`;
+
+  // Upper body facing us. y is the center of the head; len is how far the body runs down.
+  function person(x, y, s, o) {
+    const X = (v) => n(x + v * s), Yy = (v) => n(y + v * s);
+    const top = o.top || 'tee', col = o.color || B, skin = o.skin || SKIN.a, len = o.len || 140;
+    let g = '';
+    if (o.chair) g += rect(X(-60), Yy(-30), 120 * s, (len + 30) * s, o.chair, 34 * s);
+    g += rect(X(-10), Yy(18), 20 * s, 32 * s, skin, 4 * s, 3);
+    g += path(`M${X(-62)} ${Yy(len)} L${X(-60)} ${Yy(76)} Q${X(-58)} ${Yy(50)} ${X(-30)} ${Yy(46)} L${X(30)} ${Yy(46)} Q${X(58)} ${Yy(50)} ${X(60)} ${Yy(76)} L${X(62)} ${Yy(len)} Z`, col);
+    if (top === 'tee') g += stroke(`M${X(-16)} ${Yy(46)} Q${X(0)} ${Yy(60)} ${X(16)} ${Yy(46)}`, 3);
+    if (top === 'shirt') g += path(`M${X(-18)} ${Yy(44)} L${X(-4)} ${Yy(62)} L${X(0)} ${Yy(50)} L${X(4)} ${Yy(62)} L${X(18)} ${Yy(44)} Z`, W, 3) + line(X(0), Yy(62), X(0), Yy(len), 2.5) + dot(X(3), Yy(78), 2 * s, K) + dot(X(3), Yy(96), 2 * s, K);
+    if (top === 'suit' || top === 'blazer') {
+      g += poly(`${X(-18)},${Yy(46)} ${X(18)},${Yy(46)} ${X(0)},${Yy(96)}`, top === 'suit' ? W : (o.inner || PAPER), 3);
+      if (o.tie) g += poly(`${X(-5)},${Yy(52)} ${X(5)},${Yy(52)} ${X(8)},${Yy(86)} ${X(0)},${Yy(96)} ${X(-8)},${Yy(86)}`, o.tie, 3);
+      g += stroke(`M${X(-18)} ${Yy(46)} L${X(-30)} ${Yy(74)} L${X(-10)} ${Yy(84)} L${X(0)} ${Yy(100)} M${X(18)} ${Yy(46)} L${X(30)} ${Yy(74)} L${X(10)} ${Yy(84)} L${X(0)} ${Yy(100)}`, 3) + line(X(0), Yy(100), X(0), Yy(len), 3);
+      if (o.pocket) g += path(`M${X(26)} ${Yy(92)} l${n(6 * s)} ${n(-8 * s)} l${n(4 * s)} ${n(8 * s)} Z`, o.pocket, 2.5) + line(X(22), Yy(92), X(44), Yy(92), 3);
+    }
+    if (top === 'cardigan') g += poly(`${X(-14)},${Yy(46)} ${X(14)},${Yy(46)} ${X(10)},${Yy(len)} ${X(-10)},${Yy(len)}`, o.inner || W, 3) + dot(X(16), Yy(80), 2.5 * s, K) + dot(X(16), Yy(102), 2.5 * s, K);
+    if (top === 'hoodie') g += path(`M${X(-30)} ${Yy(46)} Q${X(0)} ${Yy(74)} ${X(30)} ${Yy(46)} Q${X(0)} ${Yy(58)} ${X(-30)} ${Yy(46)} Z`, o.inner || col, 3) + line(X(-8), Yy(60), X(-9), Yy(84), 3) + line(X(8), Yy(60), X(9), Yy(84), 3) + path(`M${X(-26)} ${Yy(104)} L${X(26)} ${Yy(104)} L${X(30)} ${Yy(len)} L${X(-30)} ${Yy(len)} Z`, 'rgba(0,0,0,0.08)', 3);
+    if (o.lanyard) g += stroke(`M${X(-12)} ${Yy(50)} L${X(-2)} ${Yy(88)} L${X(12)} ${Yy(50)}`, 3, o.lanyard) + rect(X(-9), Yy(88), 18 * s, 22 * s, W, 2, 2.5) + plain(X(-6), Yy(92), 12 * s, 5 * s, B);
+    g += head(x, y, s, o);
+    g += arms(x, y, s, o.arms || 'down', col, skin, o);
+    return g;
   }
+
+  function hand(x, y, s, skin) { return ell(x, y, 10 * s, 8 * s, skin, 3); }
+  function arms(x, y, s, kind, col, skin, o) {
+    const X = (v) => n(x + v * s), Yy = (v) => n(y + v * s);
+    let g = '';
+    if (kind === 'down') return stroke(`M${X(-46)} ${Yy(72)} L${X(-48)} ${Yy(140)} M${X(46)} ${Yy(72)} L${X(48)} ${Yy(140)}`, 3);
+    if (kind === 'type') {
+      g += limb(`M${X(-50)} ${Yy(66)} Q${X(-64)} ${Yy(112)} ${X(-30)} ${Yy(124)}`, col, s) + hand(X(-28), Yy(124), s, skin);
+      g += limb(`M${X(50)} ${Yy(66)} Q${X(64)} ${Yy(112)} ${X(30)} ${Yy(124)}`, col, s) + hand(X(28), Yy(124), s, skin);
+    }
+    if (kind === 'cross') {
+      g += limb(`M${X(-52)} ${Yy(66)} L${X(-54)} ${Yy(100)} L${X(26)} ${Yy(94)}`, col, s) + hand(X(30), Yy(93), s, skin);
+      g += limb(`M${X(52)} ${Yy(66)} L${X(54)} ${Yy(106)} L${X(-26)} ${Yy(108)}`, col, s) + hand(X(-30), Yy(107), s, skin);
+    }
+    if (kind === 'pointL' || kind === 'pointR') {
+      const d = kind === 'pointL' ? -1 : 1;
+      g += stroke(`M${X(-46 * d)} ${Yy(72)} L${X(-48 * d)} ${Yy(140)}`, 3);
+      g += limb(`M${X(50 * d)} ${Yy(66)} Q${X(84 * d)} ${Yy(52)} ${X(112 * d)} ${Yy(14)}`, col, s);
+      g += stroke(`M${X(112 * d)} ${Yy(14)} L${X(130 * d)} ${Yy(-6)}`, 6 * s + 5, K) + stroke(`M${X(112 * d)} ${Yy(14)} L${X(130 * d)} ${Yy(-6)}`, 6 * s, skin);
+      g += circ(X(112 * d), Yy(14), 10 * s, skin, 3);
+    }
+    if (kind === 'cup') {
+      g += stroke(`M${X(-46)} ${Yy(72)} L${X(-48)} ${Yy(140)}`, 3);
+      g += limb(`M${X(50)} ${Yy(66)} Q${X(62)} ${Yy(116)} ${X(26)} ${Yy(108)}`, col, s);
+      g += mug(X(4), Yy(82), s * 0.9, o.mug || W, true) + hand(X(28), Yy(104), s, skin);
+    }
+    if (kind === 'phone') {
+      g += stroke(`M${X(-46)} ${Yy(72)} L${X(-48)} ${Yy(140)}`, 3);
+      g += limb(`M${X(50)} ${Yy(66)} Q${X(70)} ${Yy(44)} ${X(32)} ${Yy(16)}`, col, s);
+      g += rect(X(20), Yy(-8), 12 * s, 28 * s, DK, 3 * s, 3) + hand(X(32), Yy(16), s, skin);
+    }
+    if (kind === 'phoneDown') {
+      g += limb(`M${X(-50)} ${Yy(66)} Q${X(-56)} ${Yy(112)} ${X(-14)} ${Yy(116)}`, col, s);
+      g += limb(`M${X(50)} ${Yy(66)} Q${X(56)} ${Yy(112)} ${X(14)} ${Yy(116)}`, col, s);
+      g += rect(X(-14), Yy(100), 28 * s, 18 * s, DK, 3 * s, 3) + hand(X(-14), Yy(116), s, skin) + hand(X(14), Yy(116), s, skin);
+    }
+    if (kind === 'chin') {
+      g += stroke(`M${X(46)} ${Yy(72)} L${X(48)} ${Yy(140)}`, 3);
+      g += limb(`M${X(-50)} ${Yy(66)} L${X(-40)} ${Yy(124)} L${X(-8)} ${Yy(38)}`, col, s) + ell(X(-6), Yy(34), 11 * s, 9 * s, skin, 3);
+    }
+    if (kind === 'thumb') {
+      g += stroke(`M${X(-46)} ${Yy(72)} L${X(-48)} ${Yy(140)}`, 3);
+      g += limb(`M${X(50)} ${Yy(66)} Q${X(86)} ${Yy(96)} ${X(80)} ${Yy(44)}`, col, s);
+      g += rect(X(76), Yy(14), 9 * s, 20 * s, skin, 4 * s, 3) + circ(X(80), Yy(42), 12 * s, skin, 3);
+    }
+    if (kind === 'wave') {
+      g += stroke(`M${X(-46)} ${Yy(72)} L${X(-48)} ${Yy(140)}`, 3);
+      g += limb(`M${X(50)} ${Yy(66)} Q${X(84)} ${Yy(60)} ${X(82)} ${Yy(10)}`, col, s);
+      g += ell(X(82), Yy(2), 11 * s, 13 * s, skin, 3);
+    }
+    return g;
+  }
+
+  // A seated person seen from behind.
+  function backPerson(x, y, s, o) {
+    const X = (v) => n(x + v * s), Yy = (v) => n(y + v * s);
+    const col = o.color || B, hair = o.hair || HAIR.brown, skin = o.skin || SKIN.a, style = o.style || 'short', len = o.len || 150;
+    let g = '';
+    g += rect(X(-11), Yy(14), 22 * s, 36 * s, skin, 4 * s, 3);
+    g += path(`M${X(-64)} ${Yy(len)} L${X(-62)} ${Yy(78)} Q${X(-60)} ${Yy(50)} ${X(-30)} ${Yy(46)} L${X(30)} ${Yy(46)} Q${X(60)} ${Yy(50)} ${X(62)} ${Yy(78)} L${X(64)} ${Yy(len)} Z`, col);
+    g += stroke(`M${X(-22)} ${Yy(47)} Q${X(0)} ${Yy(56)} ${X(22)} ${Yy(47)}`, 3) + stroke(`M${X(-34)} ${Yy(84)} Q${X(-28)} ${Yy(110)} ${X(-36)} ${Yy(140)} M${X(32)} ${Yy(90)} Q${X(26)} ${Yy(114)} ${X(34)} ${Yy(140)}`, 2.5, 'rgba(22,26,36,0.35)');
+    if (style === 'long') g += path(`M${X(-28)} ${Yy(-6)} L${X(-30)} ${Yy(60)} Q${X(0)} ${Yy(70)} ${X(30)} ${Yy(60)} L${X(28)} ${Yy(-6)} Z`, hair);
+    if (style === 'pony') g += path(`M${X(-9)} ${Yy(10)} Q${X(-14)} ${Yy(44)} ${X(0)} ${Yy(62)} Q${X(14)} ${Yy(44)} ${X(9)} ${Yy(10)} Z`, hair);
+    g += ell(X(-25), Yy(4), 5 * s, 8 * s, skin, 3) + ell(X(25), Yy(4), 5 * s, 8 * s, skin, 3);
+    if (style === 'bald') g += ell(X(0), Yy(0), 24 * s, 28 * s, skin) + path(`M${X(-24)} ${Yy(2)} Q${X(0)} ${Yy(14)} ${X(24)} ${Yy(2)} L${X(22)} ${Yy(18)} Q${X(0)} ${Yy(30)} ${X(-22)} ${Yy(18)} Z`, hair, 3);
+    else if (style === 'curly') { let c = ''; for (let i = 0; i < 10; i++) { const a = Math.PI * 2 * i / 10; c += circ(X(18 * Math.cos(a)), Yy(-2 + 20 * Math.sin(a)), 11 * s, hair, 3); } g += c + dot(X(0), Yy(-2), 18 * s, hair); }
+    else {
+      g += ell(X(0), Yy(0), 25 * s, 29 * s, hair);
+      g += stroke(`M${X(-8)} ${Yy(-24)} Q${X(-12)} ${Yy(0)} ${X(-6)} ${Yy(22)} M${X(8)} ${Yy(-22)} Q${X(12)} ${Yy(2)} ${X(7)} ${Yy(20)}`, 2.5, 'rgba(0,0,0,0.25)');
+    }
+    if (style === 'bun') g += circ(X(0), Yy(-20), 12 * s, hair);
+    if (o.headset) {
+      g += stroke(`M${X(-28)} ${Yy(2)} C${X(-30)} ${Yy(-44)} ${X(30)} ${Yy(-44)} ${X(28)} ${Yy(2)}`, 5 * s + 3, K);
+      g += rect(X(-34), Yy(-8), 11 * s, 20 * s, B, 4 * s, 3) + rect(X(23), Yy(-8), 11 * s, 20 * s, B, 4 * s, 3);
+    }
+    if (o.chair) g += path(`M${X(-56)} ${Yy(len)} L${X(-56)} ${Yy(110)} Q${X(-56)} ${Yy(88)} ${X(-30)} ${Yy(86)} L${X(30)} ${Yy(86)} Q${X(56)} ${Yy(88)} ${X(56)} ${Yy(110)} L${X(56)} ${Yy(len)} Z`, o.chair);
+    return g;
+  }
+
+  // ---------- Objects ----------
+  function mug(x, y, s, color = W, steam = false, band = R) {
+    let g = path(`M${n(x)} ${n(y)} L${n(x + 3 * s)} ${n(y + 30 * s)} Q${n(x + 4 * s)} ${n(y + 34 * s)} ${n(x + 8 * s)} ${n(y + 34 * s)} L${n(x + 22 * s)} ${n(y + 34 * s)} Q${n(x + 26 * s)} ${n(y + 34 * s)} ${n(x + 27 * s)} ${n(y + 30 * s)} L${n(x + 30 * s)} ${n(y)} Z`, color, 3);
+    g += stroke(`M${n(x + 29 * s)} ${n(y + 8 * s)} Q${n(x + 42 * s)} ${n(y + 10 * s)} ${n(x + 40 * s)} ${n(y + 18 * s)} Q${n(x + 38 * s)} ${n(y + 25 * s)} ${n(x + 27 * s)} ${n(y + 24 * s)}`, 3);
+    if (band) g += line(x + 2 * s, y + 11 * s, x + 28 * s, y + 11 * s, 3, band);
+    if (steam) g += stroke(`M${n(x + 9 * s)} ${n(y - 6 * s)} q${n(-5 * s)} ${n(-8 * s)} 0 ${n(-15 * s)} t0 ${n(-15 * s)} M${n(x + 20 * s)} ${n(y - 4 * s)} q${n(-5 * s)} ${n(-8 * s)} 0 ${n(-15 * s)} t0 ${n(-15 * s)}`, 2.5, MID);
+    return g;
+  }
+  function plant(x, y, s, pot = '#d9774f') {
+    // x is the center of the pot, y its base
+    const X = (v) => n(x + v * s), Yy = (v) => n(y + v * s);
+    let g = '';
+    const leaves = [[-34, -70, -30], [30, -76, 28], [-12, -96, -8], [14, -100, 12], [-40, -40, -55], [42, -46, 55], [0, -70, 0]];
+    leaves.forEach(([dx, dy, rot], i) => { g += `<ellipse cx="${X(dx)}" cy="${Yy(dy)}" rx="${n(12 * s)}" ry="${n(30 * s)}" fill="${i % 2 ? '#3fae78' : G}" transform="rotate(${rot} ${X(dx)} ${Yy(dy)})" ${st(3)}/>`; });
+    g += path(`M${X(-26)} ${Yy(-44)} L${X(26)} ${Yy(-44)} L${X(20)} ${Yy(0)} L${X(-20)} ${Yy(0)} Z`, pot, 3.5) + rect(X(-30), Yy(-50), 60 * s, 10 * s, pot, 2, 3);
+    return g;
+  }
+  function sticky(x, y, rot, c = Y, lines = 3) {
+    let g = rect(x, y, 56, 56, c, 2, 3);
+    for (let i = 0; i < lines; i++) g += line(x + 10, y + 18 + i * 12, x + 46 - i * 8, y + 18 + i * 12, 2.5);
+    return `<g transform="rotate(${rot} ${x + 28} ${y + 28})">${g}</g>`;
+  }
+  function logo(x, y, s, c = W) { return stroke(`M${n(x - 20 * s)} ${n(y + 4 * s)} Q${n(x - 10 * s)} ${n(y - 10 * s)} ${n(x)} ${n(y)} Q${n(x + 10 * s)} ${n(y - 10 * s)} ${n(x + 20 * s)} ${n(y + 4 * s)}`, 5 * s, c); }
+  function screenContent(x, y, w, h, kind) {
+    let g = '';
+    if (kind === 'call') {
+      g += plain(x, y, w * 0.45, h, '#dfe8fb');
+      for (let i = 0; i < 12; i++) { const bh = [10, 26, 18, 34, 14, 28, 40, 20, 30, 12, 24, 16][i] * h / 110; g += plain(x + 8 + i * (w * 0.45 - 16) / 12, y + h / 2 - bh / 2, (w * 0.45 - 16) / 12 - 3, bh, B, 2); }
+      g += plain(x + w * 0.45, y, w * 0.55, h, W) + plain(x + w * 0.45, y, w * 0.55, 18, G);
+      g += txt(x + w * 0.45 + 8, y + 14, 'SUMMARY', 13, W);
+      for (let i = 0; i < 4; i++) g += line(x + w * 0.45 + 10, y + 32 + i * 14, x + w - 12 - (i % 2) * 20, y + 32 + i * 14, 3, i === 0 ? DK : MID);
+    }
+    if (kind === 'drafted') {
+      g += plain(x, y, w, h, W) + plain(x, y, w, 20, B) + txt(x + 8, y + 15, 'CLAIM FILE · DRAFTED', 13, W);
+      for (let i = 0; i < 4; i++) g += line(x + 12, y + 36 + i * 14, x + w - 60 - (i % 3) * 18, y + 36 + i * 14, 3, MID);
+      g += circ(x + w - 30, y + h / 2 + 10, 18, G, 3) + stroke(`M${n(x + w - 39)} ${n(y + h / 2 + 10)} l7 7 l12 -14`, 4, W);
+    }
+    if (kind === 'doc') {
+      g += plain(x, y, w, h, W) + plain(x, y, w, 20, DK) + txt(x + 8, y + 15, 'CLAIM 4471', 13, W);
+      for (let i = 0; i < 5; i++) g += line(x + 12, y + 34 + i * 13, x + w - 16 - (i % 2) * 30, y + 34 + i * 13, 3, MID);
+    }
+    if (kind === 'slides') {
+      g += plain(x, y, w, h, W) + txt(x + 10, y + 24, 'MOMENTUM', 20, B);
+      [18, 30, 24, 42].forEach((bh, i) => { g += plain(x + 14 + i * 22, y + h - 12 - bh, 14, bh, i === 3 ? Y : LB); });
+    }
+    return g;
+  }
+  function monitor(x, y, w, h, kind) {
+    let g = rect(x + w / 2 - 8, y + h, 16, 22, GRAY, 0, 3) + rect(x + w / 2 - 34, y + h + 20, 68, 8, GRAY, 3, 3);
+    g += rect(x, y, w, h, DK, 7);
+    g += screenContent(x + 8, y + 8, w - 16, h - 16, kind);
+    g += `<rect x="${n(x + 8)}" y="${n(y + 8)}" width="${n(w - 16)}" height="${n(h - 16)}" fill="none" ${st(2.5)}/>`;
+    return g;
+  }
+  function laptopBack(x, y, w, h) { return path(`M${n(x)} ${n(y + h)} L${n(x + 6)} ${n(y)} L${n(x + w - 6)} ${n(y)} L${n(x + w)} ${n(y + h)} Z`, '#b9c0cc') + logo(x + w / 2, y + h / 2 - 2, 0.5, W); }
+  function cloud(x, y, s, c = W) {
+    return path(`M${n(x - 60 * s)} ${n(y + 14 * s)} Q${n(x - 64 * s)} ${n(y - 6 * s)} ${n(x - 40 * s)} ${n(y - 6 * s)} Q${n(x - 34 * s)} ${n(y - 30 * s)} ${n(x - 8 * s)} ${n(y - 26 * s)} Q${n(x + 8 * s)} ${n(y - 44 * s)} ${n(x + 30 * s)} ${n(y - 24 * s)} Q${n(x + 60 * s)} ${n(y - 26 * s)} ${n(x + 58 * s)} ${n(y)} Q${n(x + 72 * s)} ${n(y + 6 * s)} ${n(x + 62 * s)} ${n(y + 14 * s)} Z`, c, 3);
+  }
+  function tree(x, y, s, c = G) {
+    return rect(x - 4 * s, y - 34 * s, 8 * s, 34 * s, WOOD2, 2, 3) + circ(x, y - 50 * s, 22 * s, c, 3) + `<circle cx="${n(x - 7 * s)}" cy="${n(y - 56 * s)}" r="${n(7 * s)}" fill="rgba(255,255,255,0.25)"/>`;
+  }
+  function pine(x, y, s, c = '#2c7a58') {
+    return rect(x - 4 * s, y - 14 * s, 8 * s, 14 * s, WOOD2, 1, 3) + poly(`${n(x)},${n(y - 70 * s)} ${n(x + 20 * s)},${n(y - 14 * s)} ${n(x - 20 * s)},${n(y - 14 * s)}`, c, 3);
+  }
+  function house(x, y, w, h, wall, roof) {
+    let g = rect(x, y, w, h, wall, 0, 3) + poly(`${n(x - 6)},${n(y)} ${n(x + w / 2)},${n(y - w * 0.5)} ${n(x + w + 6)},${n(y)}`, roof, 3);
+    const cols = Math.max(1, Math.floor((w - 12) / 20)), rows = Math.max(1, Math.floor((h - 20) / 24));
+    for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) g += rect(x + 9 + c * ((w - 18) / cols) + ((w - 18) / cols - 11) / 2, y + 10 + r * 24, 11, 14, (r + c) % 3 === 0 ? Y : '#5d6a86', 1, 2.5);
+    return g;
+  }
+  function albatross(x, y, s) {
+    return path(`M${n(x - 70 * s)} ${n(y - 6 * s)} Q${n(x - 36 * s)} ${n(y - 16 * s)} ${n(x - 6 * s)} ${n(y + 2 * s)} L${n(x + 6 * s)} ${n(y + 2 * s)} Q${n(x + 36 * s)} ${n(y - 16 * s)} ${n(x + 70 * s)} ${n(y - 6 * s)} Q${n(x + 36 * s)} ${n(y - 2 * s)} ${n(x + 8 * s)} ${n(y + 10 * s)} L${n(x - 8 * s)} ${n(y + 10 * s)} Q${n(x - 36 * s)} ${n(y - 2 * s)} ${n(x - 70 * s)} ${n(y - 6 * s)} Z`, W, 3) +
+      flat(`M${n(x - 70 * s)} ${n(y - 6 * s)} Q${n(x - 56 * s)} ${n(y - 10 * s)} ${n(x - 46 * s)} ${n(y - 10 * s)} L${n(x - 50 * s)} ${n(y - 4 * s)} Z M${n(x + 70 * s)} ${n(y - 6 * s)} Q${n(x + 56 * s)} ${n(y - 10 * s)} ${n(x + 46 * s)} ${n(y - 10 * s)} L${n(x + 50 * s)} ${n(y - 4 * s)} Z`, K) +
+      ell(x, y + 4 * s, 9 * s, 7 * s, W, 3) + poly(`${n(x - 3 * s)},${n(y + 8 * s)} ${n(x + 3 * s)},${n(y + 8 * s)} ${n(x)},${n(y + 15 * s)}`, Y, 2);
+  }
+  function clock(x, y, r, hh = 10, mm = 10) {
+    const a1 = (hh % 12 + mm / 60) / 12 * Math.PI * 2, a2 = mm / 60 * Math.PI * 2;
+    let g = circ(x, y, r, W, 4);
+    for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; g += line(x + Math.sin(a) * r * 0.78, y - Math.cos(a) * r * 0.78, x + Math.sin(a) * r * 0.88, y - Math.cos(a) * r * 0.88, 2.5); }
+    g += line(x, y, x + Math.sin(a1) * r * 0.5, y - Math.cos(a1) * r * 0.5, 4) + line(x, y, x + Math.sin(a2) * r * 0.72, y - Math.cos(a2) * r * 0.72, 3, R) + dot(x, y, 3, K);
+    return g;
+  }
+  function pendant(x, len) { return line(x, 0, x, len, 3) + path(`M${x - 34} ${len + 30} Q${x - 30} ${len} ${x} ${len} Q${x + 30} ${len} ${x + 34} ${len + 30} Z`, DK) + `<ellipse cx="${x}" cy="${len + 31}" rx="22" ry="5" fill="${Y}"/>`; }
+  function svg(body, bg, defs = '') {
+    return `<svg viewBox="0 0 1200 480" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${defs ? `<defs>${defs}</defs>` : ''}<rect width="1200" height="480" fill="${bg}"/>${body}</svg>`;
+  }
+  const grad = (id, a, b) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
 
   // ---------- Cover: the Albatross Insurance tower at dusk ----------
   function cover() {
-    let b = '';
-    b += plain(0, 0, 1200, 480, '#f6c27a');
-    b += `<circle cx="930" cy="150" r="70" fill="${Y}" ${ol}/>`;
-    b += `<polygon points="0,330 140,250 260,310 400,220 540,300 700,230 860,300 1000,240 1200,310 1200,480 0,480" fill="#b9c6dd" ${ol}/>`;
-    b += `<polygon points="400,220 430,240 410,244 380,236" fill="${W}"/><polygon points="700,230 728,248 708,252 682,246" fill="${W}"/>`;
-    b += plain(0, 360, 1200, 120, '#5c86d6') + line(0, 360, 1200, 360);
-    for (let i = 0; i < 8; i++) b += line(80 + i * 140, 400 + (i % 3) * 18, 140 + i * 140, 400 + (i % 3) * 18, 3, '#a9c1f5');
-    // neighboring buildings
-    b += rect(250, 190, 120, 200, '#7f9cc9') + rect(830, 230, 140, 160, '#7f9cc9') + rect(150, 260, 90, 130, '#9fb3d6') + rect(980, 280, 110, 110, '#9fb3d6');
+    let b = plain(0, 0, 1200, 480, 'url(#cvSky)');
+    b += circ(925, 205, 60, Y, 4);
+    b += cloud(250, 92, 1) + cloud(800, 70, 0.75) + cloud(1090, 132, 0.6);
+    b += albatross(800, 132, 0.7) + albatross(1010, 168, 0.45);
+    // mountains
+    b += poly('0,300 90,232 170,270 262,198 360,262 450,216 560,268 690,188 800,256 900,212 1010,250 1100,204 1200,250 1200,345 0,345', '#c3c4e3', 3);
+    [[262, 198], [690, 188], [1100, 204], [450, 216]].forEach(([px, py]) => { b += poly(`${px},${py} ${px + 22},${py + 20} ${px + 8},${py + 15} ${px - 4},${py + 22} ${px - 20},${py + 18}`, W, 2.5); });
+    // lake
+    b += plain(0, 345, 1200, 135, '#5c86d6');
+    b += plain(494, 350, 212, 130, '#4a72c4');
+    for (let i = 0; i < 6; i++) b += line(910 - i * 6 + (i % 2) * 14, 362 + i * 14, 944 + i * 4 - (i % 2) * 10, 362 + i * 14, 4, Y);
+    for (let i = 0; i < 7; i++) b += line(520 + (i * 37) % 160, 366 + i * 15, 540 + (i * 37) % 160, 366 + i * 15, 3, i % 2 ? Y : LB);
+    for (let i = 0; i < 6; i++) b += line(60 + i * 190, 400 + (i % 3) * 22, 110 + i * 190, 400 + (i % 3) * 22, 3, LB);
+    // old town on the left
+    b += house(166, 252, 64, 88, '#f3e3c3', '#c4553a') + house(236, 266, 54, 74, '#e9d2b0', '#a8473a');
+    b += rect(296, 176, 44, 164, '#efe6d4', 0, 3) + poly('290,176 318,96 346,176', '#5f8a85', 3) + circ(318, 206, 12, W, 3) + line(318, 206, 318, 199, 2.5) + line(318, 206, 323, 206, 2.5) + rect(309, 240, 18, 30, '#5d6a86', 9, 2.5);
+    b += line(318, 96, 318, 80, 3) + line(312, 86, 324, 86, 3);
+    b += house(350, 256, 60, 84, '#f6e8cf', '#c4553a') + house(416, 270, 52, 70, '#ecd9b8', '#9c4a35');
+    // modern blocks on the right
+    b += rect(752, 196, 116, 144, '#9fc3ee', 0, 3);
+    for (let i = 1; i < 6; i++) b += line(752 + i * 19.3, 196, 752 + i * 19.3, 340, 2, '#6f93c6');
+    for (let i = 1; i < 7; i++) b += line(752, 196 + i * 20.5, 868, 196 + i * 20.5, 2, '#6f93c6');
+    b += rect(878, 232, 94, 108, '#e2dccc', 0, 3);
+    for (let i = 0; i < 4; i++) b += plain(886, 244 + i * 24, 78, 10, i === 1 ? Y : '#5d6a86');
+    b += rect(982, 262, 86, 78, '#b7c4dc', 0, 3) + rect(1000, 248, 20, 14, GRAY, 0, 2.5);
+    for (let i = 0; i < 3; i++) b += rect(994 + i * 24, 280, 14, 18, i === 2 ? Y : '#5d6a86', 1, 2.5);
     // the tower
-    b += rect(470, 40, 260, 360, '#e9ebe6', 4);
-    for (let r = 0; r < 9; r++) for (let c = 0; c < 4; c++) b += rect(492 + c * 58, 110 + r * 30, 42, 18, (r * 4 + c) % 7 === 2 ? Y : (r === 1 ? Y : '#2c3242'), 2);
-    b += rect(520, 56, 160, 40, B, 4);
-    b += `<path d="M560 82 Q580 64 600 78 Q620 64 640 82" fill="none" stroke="${W}" stroke-width="6" stroke-linecap="round"/>`;
-    b += rect(560, 360, 80, 40, '#2c3242', 2);
-    return svg(b, '#f6c27a');
+    b += rect(522, 64, 156, 56, PAPER, 0, 3.5);
+    for (let r = 0; r < 2; r++) for (let c = 0; c < 5; c++) b += rect(534 + c * 28.5, 74 + r * 22, 21, 14, (r + c) % 3 === 1 ? Y : '#36405a', 1, 2.5);
+    b += rect(536, 22, 128, 38, B, 4) + logo(600, 41, 1.05, W) + line(646, 22, 646, 4, 3) + dot(646, 4, 4.5, R);
+    b += rect(492, 118, 216, 186, PAPER, 0, 3.5);
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 6; c++) {
+      const lit = (r * 7 + c * 3) % 5 === 0 || (r === 2 && c > 2) || (r === 5 && c === 1);
+      b += rect(504 + c * 33.2, 128 + r * 21.2, 26, 15, lit ? Y : '#36405a', 1, 2.5);
+    }
+    // a late worker in one lit window
+    b += plain(504 + 4 * 33.2, 128 + 6 * 21.2, 26, 15, Y) + dot(504 + 4 * 33.2 + 10, 128 + 6 * 21.2 + 6, 3.5, K) + flat(`M${504 + 4 * 33.2 + 4} ${128 + 6 * 21.2 + 15} q6 -6 12 0 Z`, K) + rect(504 + 4 * 33.2, 128 + 6 * 21.2, 26, 15, 'none', 1, 2.5);
+    b += plain(684, 118, 24, 186, SHADE);
+    b += rect(470, 300, 260, 45, '#d7dbe2', 0, 3.5) + rect(560, 312, 80, 33, DK, 2, 3) + rect(550, 304, 100, 10, B, 2, 3);
+    for (let i = 0; i < 4; i++) b += rect(486 + i * 16, 314, 8, 22, '#5d6a86', 1, 2) + rect(666 + i * 16, 314, 8, 22, '#5d6a86', 1, 2);
+    // promenade
+    b += rect(-10, 338, 1220, 9, '#9aa3b5', 0, 3);
+    [140, 450, 735, 1100].forEach((x, i) => { b += tree(x, 340, i % 2 ? 0.8 : 0.95, i % 2 ? '#3fae78' : G); });
+    // sailboats
+    b += path('M280 410 L360 410 L348 424 L292 424 Z', W, 3) + poly('318,408 318,352 350,404', W, 3) + poly('314,408 314,364 290,404', Y, 3);
+    b += path('M1030 438 L1080 438 L1072 448 L1038 448 Z', W, 3) + poly('1054,436 1054,400 1076,434', W, 3);
+    return svg(b, '#f7b46e', grad('cvSky', '#ffe2a8', '#f7a866'));
   }
 
   // ---------- Part 1: Kick-off, a meeting room by the lake ----------
   function kickoff() {
-    let b = '';
-    b += plain(0, 0, 1200, 480, '#dfe8fb');
+    let b = plain(0, 0, 1200, 480, '#e1e9fa') + plain(0, 0, 1200, 14, '#cbd6ec');
     // window with lake and mountains
-    b += '<g transform="translate(60 0) scale(0.92 1)">';
-    b += rect(760, 50, 400, 270, '#9fd0ff', 6);
-    b += `<polygon points="764,250 840,170 900,226 980,140 1060,232 1156,180 1156,280 764,280" fill="#b9c6dd" ${ol}/>`;
-    b += `<polygon points="980,140 1004,164 984,170 960,162" fill="${W}"/><polygon points="840,170 858,188 842,192 824,186" fill="${W}"/>`;
-    b += plain(764, 280, 392, 36, '#5c86d6') + line(764, 280, 1156, 280, 3);
-    b += line(960, 50, 960, 320) + line(760, 185, 1160, 185, 3);
-    b += '</g>';
-    // whiteboard (shifted right so narrow screens show the whole word)
-    b += '<g transform="translate(110 0)">';
-    b += rect(50, 40, 600, 290, W, 6) + rect(60, 330, 580, 10, GRAY, 3);
-    b += txt(90, 110, 'MOMENTUM', 54, B);
-    b += txt(90, 150, 'PILOT  ›  SCALE  ›  5 REGIONS', 26, K);
-    b += sticky(100, 190, -6) + sticky(185, 200, 4, '#ffb3a7') + sticky(270, 186, -3) + sticky(355, 202, 6, '#b8e6c9');
-    b += `<path d="M450 236 Q500 220 520 260" fill="none" ${ol}/><path d="M512 250 L522 262 L530 248" fill="none" ${ol}/>`;
-    b += rect(462, 262, 166, 50, '#fff6cf', 4) + txt(545, 296, 'GO-LIVE M10', 24, R, 'middle');
-    b += '</g>';
-    // table and things on it
-    b += rect(-10, 370, 1220, 40, WOOD) + plain(-10, 410, 1220, 70, '#a8714a');
-    b += `<path d="M330 370 L350 318 L470 318 L490 370Z" fill="#9aa3b5" ${ol}/>` + `<path d="M720 370 L740 318 L860 318 L880 370Z" fill="#9aa3b5" ${ol}/>`;
-    b += cup(560, 336) + cup(980, 336) + cup(160, 336);
-    b += back(250, 420, 1.3, B, HAIR[0]) + back(620, 430, 1.3, R, HAIR[1]) + back(1010, 420, 1.3, G, HAIR[2]);
-    return svg(b, '#dfe8fb');
+    b += rect(770, 46, 380, 252, '#a9d6ff', 4);
+    b += poly('774,222 850,160 910,206 990,134 1070,214 1146,170 1146,262 774,262', '#c3c4e3', 3);
+    b += poly('990,134 1010,154 994,150 982,158 970,150', W, 2.5) + poly('850,160 866,176 852,172 838,178', W, 2.5);
+    b += plain(774, 262, 372, 32, '#5c86d6') + line(774, 262, 1146, 262, 3) + line(830, 278, 870, 278, 3, LB) + line(1010, 284, 1060, 284, 3, LB);
+    b += cloud(880, 100, 0.45) + plain(774, 50, 372, 34, '#eef1f6');
+    for (let i = 0; i < 4; i++) b += line(774, 58 + i * 8, 1146, 58 + i * 8, 2, GRAY);
+    b += line(960, 46, 960, 298, 5) + rect(762, 296, 396, 12, W, 2, 3);
+    // whiteboard
+    b += rect(172, 40, 520, 270, W, 6);
+    b += txt(198, 96, 'PROJECT MOMENTUM', 40, B);
+    b += line(206, 150, 590, 150, 4) + poly('590,142 606,150 590,158', K, 3);
+    [[232, 'KICK-OFF', W], [330, 'PILOT', W], [428, 'SCALE', W], [530, 'GO-LIVE M10', Y]].forEach(([x, l, f]) => { b += circ(x, 150, 12, f, 3.5) + txt(x, 186, l, 19, l.startsWith('GO') ? R : K, 'middle'); });
+    b += sticky(200, 214, -6) + sticky(268, 222, 5, PINK) + sticky(336, 212, -3, LG);
+    b += txt(440, 240, 'BUDGET?', 24, K) + `<ellipse cx="488" cy="232" rx="58" ry="22" fill="none" stroke="${R}" stroke-width="3.5" transform="rotate(-4 488 232)"/>`;
+    b += txt(430, 286, 'AI-FIRST!!', 26, R, 'start', -3);
+    // a rocket doodle
+    b += path('M610 286 Q606 244 628 222 Q650 244 646 286 Z', W, 3) + circ(628, 250, 6, LB, 2.5) + path('M610 272 L598 290 L612 286 Z', R, 2.5) + path('M646 272 L658 290 L644 286 Z', R, 2.5) + stroke('M618 292 q10 18 20 0', 3, R);
+    b += rect(186, 310, 492, 10, GRAY, 3, 3) + rect(230, 302, 30, 8, B, 3, 2.5) + rect(266, 302, 30, 8, R, 3, 2.5) + rect(302, 302, 30, 8, G, 3, 2.5);
+    b += pendant(330, 18) + pendant(1010, 10);
+    // the sponsor presenting
+    b += person(728, 150, 1.02, { top: 'suit', color: DK, tie: R, pocket: W, style: 'side', hair: HAIR.gray, skin: SKIN.d, brows: 'up', mouth: 'big', arms: 'pointL', len: 220 });
+    // far side of the table: CFO and data scientist
+    b += person(892, 262, 0.8, { top: 'blazer', color: '#5f6f8f', inner: W, style: 'bob', hair: HAIR.red, skin: SKIN.a, glasses: true, brows: 'raised', mouth: 'flat', chair: '#3a4256', len: 110 });
+    b += person(1056, 264, 0.8, { top: 'hoodie', color: P, style: 'curly', hair: HAIR.black, skin: SKIN.c, brows: 'flat', mouth: 'smirk', eyes: 'side', chair: '#3a4256', len: 110 });
+    // table
+    b += poly('120,334 1080,334 1210,402 -10,402', WOOD, 3.5) + plain(-10, 402, 1220, 80, WOOD2) + line(-10, 402, 1210, 402, 3.5);
+    b += flat('M160 340 L1040 340 L1080 352 L120 352 Z', 'rgba(255,255,255,0.18)');
+    b += laptopBack(1016, 296, 82, 44) + rect(860, 330, 60, 8, W, 2, 2.5);
+    // donuts: enthusiasm is cheap in month 1
+    b += path('M424 352 L560 352 L572 372 L412 372 Z', '#f3e3c3', 3) + path('M424 352 L436 318 L548 318 L560 352 Z', '#ffe9b0', 3);
+    [[452, 350, PINK], [490, 348, '#c98b5a'], [528, 350, PINK]].forEach(([x, y, c]) => { b += ell(x, y, 17, 9, c, 3) + ell(x, y - 1, 5, 3, '#f3e3c3', 2); });
+    b += txt(492, 340, 'KICK-OFF', 13, R, 'middle');
+    b += mug(610, 330, 0.9, W, true) + mug(980, 332, 0.8, Y, false, B) + mug(170, 334, 0.9, LB, true, B);
+    b += rect(250, 352, 70, 46, W, 2, 3) + line(260, 364, 306, 364, 2.5, MID) + line(260, 376, 296, 376, 2.5, MID);
+    // near side, seen from behind
+    b += backPerson(300, 420, 1.3, { color: G, hair: HAIR.blond, style: 'pony', chair: DK });
+    b += backPerson(640, 428, 1.3, { color: R, hair: HAIR.brown, style: 'short', chair: DK });
+    b += backPerson(920, 432, 1.25, { color: B, hair: HAIR.black, style: 'curly', skin: SKIN.b, chair: DK });
+    b += plant(1170, 480, 1.2);
+    return svg(b, '#e1e9fa');
   }
 
   // ---------- Part 2: Pilot, the claims floor in region one ----------
   function pilot() {
-    let b = '';
-    b += plain(0, 0, 1200, 480, '#e8eef9');
-    // ceiling lights and sign
-    for (let i = 0; i < 4; i++) b += rect(90 + i * 300, -10, 180, 26, W, 6);
-    b += line(600, 16, 600, 50, 3) + rect(420, 50, 360, 62, B, 6) + txt(600, 94, 'CLAIMS · REGION 1', 34, W, 'middle');
-    b += rect(820, 60, 150, 44, Y, 4) + txt(895, 91, 'PILOT', 26, K, 'middle');
-    // back row of desks
-    for (let i = 0; i < 5; i++) {
-      const x = 20 + i * 236;
-      // person first, then the desk in front of them, then the monitor standing on the desk beside them
-      b += front(x + 70, 248, 0.9, [G, R, B, '#8a6bd1', Y][i], SKIN[i % 4], HAIR[(i + 1) % 4], true);
-      b += rect(x, 300, 226, 22, WOOD, 3);
-      b += monitor(x + 122, 216, 92, 62, i % 2 === 0);
-    }
-    // ringing phone and call waves, front
-    b += rect(520, 360, 160, 70, '#2c3242', 12) + rect(540, 336, 120, 34, R, 14);
-    for (let i = 0; i < 3; i++) b += `<path d="M${700 + i * 18} ${350 - i * 10} Q${720 + i * 24} ${370} ${700 + i * 18} ${390 + i * 10}" fill="none" stroke="${R}" stroke-width="5" stroke-linecap="round"/>`;
-    for (let i = 0; i < 3; i++) b += `<path d="M${500 - i * 18} ${350 - i * 10} Q${480 - i * 24} ${370} ${500 - i * 18} ${390 + i * 10}" fill="none" stroke="${R}" stroke-width="5" stroke-linecap="round"/>`;
-    b += rect(-10, 430, 1220, 60, WOOD);
-    // a summary popping up
-    b += rect(820, 330, 300, 90, W, 8) + txt(840, 362, 'MOMENTUM · SUMMARY', 20, B) + line(840, 382, 1090, 382, 3, '#7a8399') + line(840, 400, 1040, 400, 3, '#7a8399');
-    b += rect(60, 340, 230, 70, '#fff6cf', 8) + txt(80, 372, 'HANDLED TODAY', 20, K) + txt(80, 400, '214 CALLS', 26, G);
-    return svg(b, '#e8eef9');
+    let b = plain(0, 0, 1200, 480, '#e6edf8') + plain(0, 0, 1200, 12, '#cbd6ec');
+    for (let i = 0; i < 4; i++) b += rect(80 + i * 300, -8, 200, 22, W, 6, 3) + plain(92 + i * 300, 10, 176, 3, Y);
+    b += line(478, 12, 478, 42, 3) + line(722, 12, 722, 42, 3) + rect(446, 42, 308, 54, B, 6) + txt(600, 81, 'CLAIMS · REGION 1', 30, W, 'middle');
+    b += `<g transform="rotate(6 812 70)">${rect(770, 52, 92, 36, Y, 4, 3)}${txt(816, 78, 'PILOT', 22, K, 'middle')}</g>`;
+    // pinboard
+    b += rect(176, 64, 176, 118, '#d9a66b', 4) + rect(192, 78, 144, 60, W, 2, 3) + txt(264, 103, 'DO NOT UNPLUG', 18, R, 'middle') + txt(264, 128, 'MOMENTUM!', 22, R, 'middle');
+    b += dot(200, 84, 4, R) + dot(328, 84, 4, B) + sticky(196, 140, -8, LG, 2) + `<g transform="scale(0.7) translate(${300 / 0.7 - 300} ${148 / 0.7 - 148})">${sticky(300, 148, 6, PINK, 2)}</g>`;
+    b += clock(930, 100, 34, 9, 40);
+    // dividers
+    b += rect(392, 196, 18, 104, LB, 3, 3) + rect(662, 196, 18, 104, LB, 3, 3);
+    // monitors and desks
+    b += plain(0, 300, 1200, 22, WOOD) + line(0, 300, 1200, 300, 3.5) + line(0, 322, 1200, 322, 3.5);
+    b += monitor(166, 152, 196, 120, 'call') + monitor(436, 152, 196, 120, 'drafted') + monitor(706, 152, 196, 120, 'doc');
+    b += sticky(330, 140, 8, Y, 2).replace('<g ', '<g opacity="1" ') ;
+    b += `<g transform="translate(866 126) scale(0.55)">${sticky(0, 0, -6, PINK, 0)}${txt(28, 42, '?', 40, R, 'middle')}</g>`;
+    b += mug(372, 266, 0.85, W, true) + plant(640, 300, 0.55) + rect(906, 270, 48, 30, DK, 6, 3) + rect(912, 262, 36, 12, R, 5, 3);
+    b += stroke('M964 262 q8 10 0 20 M976 256 q10 16 0 32', 3.5, R);
+    b += rect(124, 278, 34, 22, W, 2, 2.5) + rect(128, 272, 34, 22, W, 2, 2.5);
+    // the claims handlers, from behind
+    b += backPerson(264, 352, 1.2, { color: G, hair: HAIR.black, style: 'long', headset: true, chair: DK });
+    b += backPerson(534, 356, 1.2, { color: Y, hair: HAIR.red, style: 'bun', headset: true, chair: DK });
+    b += backPerson(804, 354, 1.2, { color: P, hair: HAIR.brown, style: 'short', headset: true, chair: DK });
+    // call waves near the first handler
+    b += stroke('M214 330 q-12 12 0 24 M200 322 q-18 20 0 40', 3.5, B);
+    // head of claims operations, watching
+    b += path('M962 360 L1062 360 L1066 490 L958 490 Z', DK) + line(1012, 380, 1012, 490, 3);
+    b += person(1012, 178, 1.0, { top: 'shirt', color: '#7f9cc9', style: 'short', hair: HAIR.brown, skin: SKIN.b, beard: true, brows: 'angry', mouth: 'flat', arms: 'cross', lanyard: Y, len: 196 });
+    b += rect(966, 362, 92, 12, K, 2, 2) + rect(1004, 362, 16, 12, GRAY, 2, 2.5);
+    return svg(b, '#e6edf8');
   }
 
   // ---------- Part 3: Scale decision, the 14th-floor boardroom ----------
   function boardroom() {
-    let b = '';
-    b += plain(0, 0, 1200, 480, '#2b3147');
-    // window with clouds
-    b += rect(40, 40, 300, 260, '#9fd0ff', 6) + rect(860, 40, 300, 260, '#9fd0ff', 6);
-    b += `<ellipse cx="150" cy="120" rx="70" ry="26" fill="${W}" ${ol}/><ellipse cx="250" cy="200" rx="60" ry="22" fill="${W}" ${ol}/><ellipse cx="1000" cy="150" rx="80" ry="28" fill="${W}" ${ol}/>`;
-    b += txt(1150, 290, '14', 36, '#2b3147', 'end');
-    // screen with chart and question
-    b += rect(390, 40, 420, 240, W, 6);
-    b += txt(420, 86, 'SCALE TO 5 REGIONS?', 30, K);
-    const bars = [70, 110, 90, 150];
-    bars.forEach((h, i) => { b += rect(430 + i * 70, 250 - h, 46, h, i === 3 ? Y : LB, 2); });
-    b += `<line x1="420" y1="250" x2="740" y2="250" ${ol}/>`;
-    b += txt(780, 250, '?', 130, R, 'end');
+    let b = plain(0, 0, 1200, 480, '#2b3147');
+    b += plain(0, 34, 1200, 266, '#9fd0ff');
+    b += cloud(160, 96, 0.6) + cloud(1040, 84, 0.7);
+    const sky = [[20, 210, 60], [86, 180, 46], [140, 230, 70], [216, 160, 40], [262, 200, 64], [870, 190, 56], [930, 150, 44], [978, 214, 70], [1052, 170, 50], [1106, 206, 80]];
+    sky.forEach(([x, y, w], i) => {
+      b += rect(x, y, w, 300 - y, i % 2 ? '#c8daf3' : '#b0c6e8', 0, 2.5);
+      for (let r = 0; r < Math.floor((290 - y) / 18); r++) b += plain(x + 8, y + 10 + r * 18, w - 16, 6, (r + i) % 4 === 0 ? '#fff4c2' : 'rgba(22,26,36,0.12)');
+    });
+    for (let i = 0; i <= 8; i++) b += plain(i * 150 - 7, 34, 14, 266, '#22283b');
+    b += plain(0, 0, 1200, 36, '#22283b') + plain(0, 296, 1200, 12, '#22283b');
+    // ceiling spots
+    for (let i = 0; i < 6; i++) b += `<ellipse cx="${120 + i * 192}" cy="16" rx="18" ry="5" fill="${Y}"/>`;
+    // the slide
+    b += rect(410, 44, 380, 196, W, 6, 4);
+    b += txt(434, 84, 'SCALE TO 5 REGIONS?', 30, K);
+    [56, 84, 70, 112].forEach((h, i) => { b += rect(446 + i * 62, 210 - h, 42, h, i === 3 ? Y : LB, 2, 3); });
+    b += line(430, 210, 704, 210, 3.5) + txt(770, 208, '?', 110, R, 'end') + txt(776, 230, 'SLIDE 47 OF 112', 13, MID, 'end');
     // table
-    b += `<polygon points="300,340 900,340 1120,480 80,480" fill="${WOOD}" ${ol}/>`;
-    b += `<polygon points="360,340 840,340 980,420 220,420" fill="#b97a4c"/>`;
-    // chairs and committee members
-    const seats = [[250, 330, R, 0], [410, 310, B, 1], [600, 300, '#2c3242', 2], [790, 310, G, 3], [950, 330, '#8a6bd1', 0]];
-    seats.forEach(([x, y, shirt, k]) => { b += rect(x - 54, y - 78, 108, 130, '#1d2233', 34); b += front(x, y - 10, 1, shirt, SKIN[k], HAIR[(k + 2) % 4], false); });
-    b += rect(560, 360, 80, 26, Y, 3) + txt(600, 380, 'COO', 18, K, 'middle');
-    b += cup(380, 380) + cup(780, 380);
+    b += poly('380,322 820,322 1130,480 70,480', '#7a4a2e', 4) + flat('M420 330 L780 330 L960 430 L240 430 Z', 'rgba(255,255,255,0.12)');
+    // committee members
+    b += person(410, 272, 0.82, { top: 'suit', color: '#59647d', tie: G, style: 'bald', hair: HAIR.gray, skin: SKIN.e, eyes: 'closed', mouth: 'open', brows: 'flat', chair: '#151a28', len: 90 });
+    b += txt(352, 262, 'z', 22, W) + txt(334, 244, 'z', 30, W);
+    b += person(790, 272, 0.82, { top: 'shirt', color: LB, style: 'side', hair: HAIR.black, skin: SKIN.b, eyes: 'down', brows: 'flat', mouth: 'flat', arms: 'phoneDown', chair: '#151a28', len: 90 });
+    b += person(252, 306, 1.0, { top: 'blazer', color: '#5f6f8f', inner: W, style: 'bob', hair: HAIR.red, skin: SKIN.a, glasses: true, brows: 'angry', mouth: 'frown', arms: 'cross', chair: '#151a28', len: 180 });
+    b += person(950, 306, 1.0, { top: 'suit', color: DK, tie: R, pocket: W, style: 'side', hair: HAIR.gray, skin: SKIN.d, brows: 'up', mouth: 'big', arms: 'pointL', chair: '#151a28', len: 180 });
+    // name plates and things on the table
+    [[330, 392, 'CFO'], [470, 352, 'RISK'], [730, 352, 'IT'], [870, 392, 'COO']].forEach(([x, y, l]) => { b += poly(`${x - 34},${y + 22} ${x + 34},${y + 22} ${x + 28},${y} ${x - 28},${y}`, W, 3) + txt(x, y + 17, l, 16, K, 'middle'); });
+    b += path('M560 372 Q600 360 640 372 L632 386 Q600 394 568 386 Z', W, 3);
+    for (let i = 0; i < 4; i++) b += ell(578 + i * 14, 372, 7, 4, '#d9a441', 2);
+    b += rect(530, 340, 12, 30, '#cfe7ff', 3, 2.5) + rect(658, 340, 12, 30, '#cfe7ff', 3, 2.5);
+    b += mug(396, 408, 0.8, W, true) + mug(790, 410, 0.8, W, false, B);
     return svg(b, '#2b3147');
   }
 
   // ---------- Part 4: Rollout, five regions connected ----------
   function rollout() {
-    let b = '';
-    b += plain(0, 0, 1200, 480, '#ffe9b0');
-    b += `<circle cx="1080" cy="90" r="46" fill="${Y}" ${ol}/>`;
-    b += `<polygon points="0,300 160,230 300,280 460,210 620,270 780,200 940,260 1100,210 1200,250 1200,480 0,480" fill="#cfe3c6" ${ol}/>`;
-    b += plain(0, 380, 1200, 100, '#b5d3a8');
-    // rail line connecting regions
-    b += `<path d="M220 400 C340 350 450 430 600 380 S860 340 980 390" fill="none" stroke="${K}" stroke-width="10" stroke-linecap="round"/>`;
-    b += `<path d="M220 400 C340 350 450 430 600 380 S860 340 980 390" fill="none" stroke="${W}" stroke-width="4" stroke-dasharray="14 12"/>`;
-    const towns = [[220, 'R1', 170, true], [410, 'R2', 130, false], [600, 'R3', 190, false], [790, 'R4', 140, false], [980, 'R5', 120, false]];
-    towns.forEach(([x, label, h, lit]) => {
-      b += rect(x - 50, 380 - h, 100, h, lit ? '#e9ebe6' : '#9fb3d6', 3);
-      for (let r = 0; r < Math.floor((h - 40) / 30); r++) for (let c = 0; c < 2; c++) b += rect(x - 34 + c * 40, 380 - h + 20 + r * 30, 28, 16, lit ? Y : '#5d6a86', 2);
-      b += line(x, 380 - h, x, 380 - h - 40, 4);
-      b += `<path d="M${x} ${380 - h - 40} L${x + 34} ${380 - h - 32} L${x} ${380 - h - 22}Z" fill="${lit ? G : R}" ${ol}/>`;
-      b += circle(x, 440, 26, lit ? G : W) + txt(x, 450, label, 26, lit ? W : K, 'middle');
+    let b = plain(0, 0, 1200, 480, 'url(#roSky)');
+    b += circ(1070, 88, 42, Y, 4) + cloud(520, 70, 0.6) + cloud(960, 150, 0.5);
+    // plane towing a banner
+    b += stroke('M332 92 L360 96', 2.5) + path('M360 78 L640 78 L626 96 L640 114 L360 114 Z', W, 3) + txt(500, 105, '400 CLAIMS HANDLERS', 24, B, 'middle');
+    b += ell(298, 92, 36, 12, R, 3) + path('M286 92 L272 66 L262 66 L268 92 Z', R, 3) + path('M300 94 L284 122 L274 122 L282 94 Z', '#a33a2c', 3) + path('M330 84 L338 74 L340 92 Z', R, 3) + ell(266, 92, 3, 14, MID, 2.5) + circ(286, 88, 5, LB, 2.5);
+    // hills
+    b += poly('0,262 130,214 260,248 400,200 560,244 700,196 860,240 1000,198 1200,236 1200,480 0,480', '#cfe3c6', 3);
+    b += poly('0,320 180,286 380,318 600,282 820,312 1020,284 1200,306 1200,480 0,480', '#b5d3a8', 3);
+    // river
+    b += stroke('M1210 330 C1100 360 1040 400 900 404 S640 440 500 452 S200 470 -10 476', 26, K) + stroke('M1210 330 C1100 360 1040 400 900 404 S640 440 500 452 S200 470 -10 476', 19, '#7fb0ea');
+    // railway
+    const rail = 'M120 372 C260 336 360 392 520 360 S800 322 1080 356';
+    b += stroke(rail, 14, K) + stroke(rail, 6, '#9aa3b5') + stroke(rail, 14, K, 'stroke-dasharray="3 16" opacity="0.6"');
+    // towns
+    const towns = [[190, 360, 'R1', true], [440, 368, 'R2', false], [600, 350, 'R3', false], [800, 336, 'R4', false], [990, 346, 'R5', false]];
+    towns.forEach(([x, y, l, live]) => {
+      b += house(x - 70, y - 52, 40, 52, live ? '#f6e8cf' : '#e2dccc', live ? '#c4553a' : '#9a8f8a');
+      b += rect(x - 22, y - 112, 56, 112, live ? PAPER : '#c7d0e0', 0, 3);
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 2; c++) b += rect(x - 14 + c * 24, y - 98 + r * 22, 16, 13, live ? Y : '#7e8aa5', 1, 2.5);
+      b += rect(x - 16, y - 128, 44, 16, live ? B : MID, 2, 3) + logo(x + 6, y - 120, 0.45, W);
+      b += house(x + 40, y - 40, 34, 40, live ? '#ecd9b8' : '#d6d0c5', live ? '#9c4a35' : '#8f8682');
+      b += line(x - 50, y - 52, x - 50, y - 106, 3) + path(`M${x - 50} ${y - 106} L${x - 14} ${y - 98} L${x - 50} ${y - 88} Z`, live ? G : W, 3) + txt(x - 38, y - 92, l, 14, live ? W : K, 'middle');
     });
-    // paper plane carrying the rollout
-    b += `<path d="M420 120 L520 150 L440 170 Z" fill="${W}" ${ol}/><path d="M440 170 L455 148 L520 150" fill="none" ${ol}/>`;
-    b += `<path d="M260 200 Q330 90 410 128" fill="none" stroke="${K}" stroke-width="3" stroke-dasharray="8 10"/>`;
-    b += rect(530, 60, 320, 56, B, 6) + txt(690, 99, '400 CLAIMS HANDLERS', 28, W, 'middle');
-    return svg(b, '#ffe9b0');
+    // region one celebrates
+    for (let i = 0; i < 12; i++) b += `<rect x="${150 + (i * 37) % 130}" y="${170 + (i * 23) % 60}" width="8" height="4" fill="${[R, B, Y, G][i % 4]}" transform="rotate(${i * 30} ${154 + (i * 37) % 130} ${172 + (i * 23) % 60})"/>`;
+    // the train, on its way to region two
+    b += rect(262, 336, 54, 26, B, 4, 3) + logo(289, 348, 0.45, W) + rect(318, 330, 42, 32, R, 4, 3) + rect(336, 318, 14, 14, DK, 2, 3) + rect(324, 336, 13, 10, '#cfe7ff', 2, 2.5);
+    [274, 304, 330, 350].forEach((x) => { b += circ(x, 363, 6, DK, 3); });
+    b += circ(346, 302, 8, W, 3) + circ(330, 288, 10, W, 3) + circ(310, 276, 7, W, 3);
+    // trees
+    [[60, 330, 'p'], [100, 340, 't'], [470, 330, 'p'], [520, 336, 't'], [690, 318, 'p'], [890, 322, 't'], [1100, 320, 'p'], [1140, 330, 't'], [300, 420, 't'], [740, 430, 'p']].forEach(([x, y, k], i) => { b += k === 'p' ? pine(x, y, 0.8) : tree(x, y, 0.75, i % 2 ? '#3fae78' : G); });
+    return svg(b, '#ffe7a8', grad('roSky', '#fff1c9', '#ffd98e'));
   }
 
   // ---------- Part 5: Year end, a desk in December ----------
   function yearend() {
-    let b = '';
-    b += plain(0, 0, 1200, 480, '#cdd6ea');
-    // window with snowy evening
-    b += rect(700, 30, 460, 290, '#2c3a6b', 6);
-    for (let i = 0; i < 26; i++) b += `<circle cx="${720 + (i * 97) % 430}" cy="${50 + (i * 53) % 250}" r="${3 + (i % 3)}" fill="${W}"/>`;
-    b += `<polygon points="704,300 800,250 900,286 1010,240 1156,290 1156,316 704,316" fill="${W}" ${ol}/>`;
-    b += line(930, 30, 930, 320);
+    let b = plain(0, 0, 1200, 480, '#cdd6ea');
+    // window with a snowy evening
+    b += rect(730, 34, 420, 272, '#24305e', 4);
+    b += circ(1086, 92, 24, '#fff4c2', 3);
+    const city = [[734, 200, 70], [804, 170, 50], [854, 222, 80], [934, 150, 60], [994, 196, 74], [1068, 176, 78]];
+    city.forEach(([x, y, w], i) => {
+      b += rect(x, y, w, 302 - y, '#3a4a80', 0, 2.5);
+      for (let r = 0; r < Math.floor((290 - y) / 20); r++) for (let c = 0; c < Math.floor((w - 10) / 18); c++) if ((r * 3 + c + i) % 4 === 0) b += plain(x + 8 + c * 18, y + 10 + r * 20, 9, 9, Y);
+    });
+    for (let i = 0; i < 34; i++) b += dot(740 + (i * 97) % 400, 46 + (i * 53) % 240, 2.5 + (i % 3), W);
+    b += line(940, 34, 940, 306, 5) + rect(720, 300, 440, 16, W, 3, 3) + flat('M734 300 Q800 290 860 298 Q940 288 1010 298 Q1080 290 1146 300 Z', W);
     // wall calendar
-    b += rect(80, 40, 220, 240, W, 4) + plain(84, 44, 212, 60, R) + txt(190, 92, 'DECEMBER', 36, W, 'middle');
-    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) b += `<rect x="${104 + c * 38}" y="${124 + r * 36}" width="28" height="24" fill="${(r === 3 && c === 3) ? Y : '#e9ebe6'}"/>`;
-    b += `<circle cx="232" cy="244" r="22" fill="none" stroke="${R}" stroke-width="5"/>`;
+    b += rect(184, 40, 200, 206, W, 4) + plain(188, 44, 192, 50, R) + txt(284, 82, 'DECEMBER', 34, W, 'middle');
+    b += circ(230, 40, 6, GRAY, 3) + circ(338, 40, 6, GRAY, 3);
+    for (let r = 0; r < 4; r++) for (let c = 0; c < 5; c++) b += plain(204 + c * 35, 104 + r * 28, 26, 20, (r === 2 && c === 3) ? Y : PAPER);
+    b += `<ellipse cx="322" cy="170" rx="21" ry="16" fill="none" stroke="${R}" stroke-width="4"/>` + txt(284, 234, 'PLANNING WEEK', 16, R, 'middle');
+    // a framed poster nobody asked for
+    b += rect(430, 60, 230, 150, W, 2, 4) + rect(442, 72, 206, 126, '#fff6cf', 0, 3) + txt(545, 102, 'SYNERGIES', 26, B, 'middle');
+    b += stroke('M462 182 L500 166 L530 174 L566 146 L620 120', 4, G) + poly('612,116 628,116 622,130', G, 3);
     // desk
-    b += rect(-10, 330, 1220, 40, WOOD) + plain(-10, 370, 1220, 110, '#a8714a');
-    // laptop with payback gauge
-    b += `<path d="M380 330 L400 190 L640 190 L660 330Z" fill="#2c3242" ${ol}/>`;
-    b += `<path d="M450 300 A70 70 0 0 1 590 300" fill="none" stroke="${G}" stroke-width="16"/>`;
-    b += `<path d="M560 252 A70 70 0 0 1 590 300" fill="none" stroke="${R}" stroke-width="16"/>`;
-    b += line(520, 300, 556, 248, 6, Y);
-    b += rect(340, 330, 360, 16, GRAY, 4);
-    // budget binders and desk lamp
-    b += rect(760, 230, 70, 100, B, 4) + rect(836, 220, 70, 110, R, 4) + rect(912, 240, 70, 90, G, 4);
-    b += txt(795, 300, '2027', 22, W, 'middle', -90);
-    b += `<path d="M150 330 L170 250 L240 210" fill="none" stroke="${K}" stroke-width="8" stroke-linecap="round"/>`;
-    b += `<path d="M220 190 L290 220 L260 260 Z" fill="${Y}" ${ol}/>` + rect(120, 322, 80, 14, K, 4);
-    b += cup(1040, 296);
+    b += plain(0, 330, 1200, 22, WOOD) + plain(0, 352, 1200, 128, WOOD2) + line(0, 330, 1200, 330, 3.5) + line(0, 352, 1200, 352, 3.5);
+    // inbox full of invoices
+    b += path('M188 318 L348 318 L338 334 L198 334 Z', DK, 3);
+    [[206, 262, -8], [222, 270, 6], [212, 282, -3], [228, 292, 4], [204, 302, -2]].forEach(([x, y, r]) => { b += `<g transform="rotate(${r} ${x + 54} ${y + 18})">${rect(x, y, 108, 36, W, 2, 3)}${stroke(`M${x} ${y} L${x + 54} ${y + 20} L${x + 108} ${y}`, 2.5)}</g>`; });
+    b += `<g transform="rotate(-10 262 272)">${rect(226, 260, 72, 24, 'none', 3, 3).replace(`stroke="${K}"`, `stroke="${R}"`)}${txt(262, 279, 'INVOICE', 16, R, 'middle')}</g>`;
+    // laptop with the payback gauge
+    b += rect(446, 176, 240, 152, DK, 8) + plain(458, 188, 216, 128, W);
+    b += txt(566, 210, 'PAYBACK', 16, MID, 'middle');
+    b += stroke('M498 292 A68 68 0 0 1 634 292', 16, G) + stroke('M612 246 A68 68 0 0 1 634 292', 16, R);
+    b += line(566, 292, 604, 248, 6, K) + dot(566, 292, 7, K) + txt(566, 312, '?.?? YRS', 16, K, 'middle');
+    b += path('M424 328 L708 328 L724 346 L408 346 Z', GRAY, 3);
+    b += `<g transform="translate(652 166) scale(0.6) rotate(8)">${sticky(0, 0, 0, Y, 0)}${txt(28, 26, 'CALL', 16, K, 'middle')}${txt(28, 44, 'LINDA', 16, K, 'middle')}</g>`;
+    // binders
+    [[750, 210, 46, 120, B, '2027 PLAN'], [800, 222, 44, 108, R, 'BUDGET'], [848, 202, 46, 128, G, 'RISKS']].forEach(([x, y, w, h, c, l]) => { b += rect(x, y, w, h, c, 4) + circ(x + w / 2, y + h - 22, 7, W, 2.5) + txt(x + w / 2 + 6, y + h - 40, l, 18, W, 'start', -90); });
+    // lamp, mug and a small tree
+    b += stroke('M1004 330 L1018 254 L968 214', 7, K) + path('M944 196 L1004 218 L976 254 Z', Y, 3) + rect(976, 322, 60, 12, DK, 4, 3);
+    b += mug(920, 290, 1.0, W, true);
+    b += rect(1084, 300, 36, 30, '#d9774f', 3, 3) + poly('1102,214 1136,302 1068,302', G, 3) + poly('1102,214 1108,226 1096,226', Y, 2);
+    [[1092, 262, R], [1112, 250, Y], [1100, 282, B], [1122, 284, Y], [1084, 288, R]].forEach(([x, y, c]) => { b += circ(x, y, 4, c, 2); });
     return svg(b, '#cdd6ea');
   }
 
   const cache = {};
-  function scene(n) {
-    if (cache[n]) return cache[n];
-    const f = [cover, kickoff, pilot, boardroom, rollout, yearend][n] || cover;
-    cache[n] = f();
-    return cache[n];
+  function scene(i) {
+    if (cache[i]) return cache[i];
+    const f = [cover, kickoff, pilot, boardroom, rollout, yearend][i] || cover;
+    cache[i] = f();
+    return cache[i];
   }
   root.PilotScenes = { scene };
 })(this);
