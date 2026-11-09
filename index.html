@@ -249,7 +249,7 @@ p { margin: 0 0 12px; }
     <div class="track detail" id="track" role="img" aria-label="Payback against the investment limit"><div class="fill" id="fill" style="width:31%"></div><div class="limit" id="limit"><span id="limitLab">Limit</span></div></div>
     <div class="money detail" id="money" hidden>
       <div class="pm-m"><div class="pm-l"><span>Cost vs budget</span><b id="mCost">3.2 / 5.5</b></div><div class="pm-t"><div class="pm-f good" id="mCostF"></div></div></div>
-      <div class="pm-m"><div class="pm-l"><span>Savings per year</span><b id="mSave">3.2 / 3.2</b></div><div class="pm-t"><div class="pm-f good" id="mSaveF"></div></div></div>
+      <div class="pm-m"><div class="pm-l"><span id="mSaveLab">Projected savings per year</span><b id="mSave">3.2 / 3.2</b></div><div class="pm-t"><div class="pm-f good" id="mSaveF"></div></div></div>
       <div class="pm-m"><div class="pm-l"><span>Active users</span><b id="mUsers">Not live yet</b></div><div class="pm-t"><div class="pm-f good" id="mUsersF"></div></div></div>
       <div class="pm-m"><div class="pm-l"><span>User satisfaction</span><b id="mSat">Not live yet</b></div><div class="pm-t"><div class="pm-f good" id="mSatF"></div></div></div>
     </div>
@@ -1011,6 +1011,7 @@ p { margin: 0 0 12px; }
     const cf = document.getElementById('mCostF');
     cf.style.width = Math.min(100, (c / b) * 100) + '%';
     cf.className = 'pm-f good' + (c > b ? ' low' : c > b * 0.9 ? ' mid' : '');
+    document.getElementById('mSaveLab').textContent = s.credit >= 1 ? 'Actual savings per year' : 'Projected savings per year';
     document.getElementById('mSave').textContent = 'CHF ' + sv.toFixed(1) + 'm of ' + pr.toFixed(1) + 'm';
     const sf = document.getElementById('mSaveF');
     sf.style.width = Math.max(3, Math.min(100, (sv / pr) * 100)) + '%';
